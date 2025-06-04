@@ -1,0 +1,87 @@
+---
+title: "Depth Use"
+author: "Benjamin Hlina"
+format:
+  html:
+    embed-resources: true
+---
+
+# load packages 
+```{r, message = FALSE}
+# ---- Load packages ----
+{
+  library(dplyr)
+  library(ggplot2)
+  library(glatos)
+  library(ggtext)
+  library(here)
+  library(janitor)
+  library(lubridate)
+  library(purrr)
+  library(plotly)
+  library(qs)
+  library(stringr)
+  library(tidyr)
+
+}
+```
+
+# Bring in data 
+
+```{r, message=FALSE, results='hide'}
+# ---- bring in data ----
+det_clean <- qread(here("data-saved",
+                        "detection-data",
+                        "removed-dead-dets",
+                        "final_cleaned_detection_data.qs"))
+
+glimpse(det_clean)
+```
+
+# plot 
+
+```{r, message=FALSE}
+p <- det_clean %>%
+  # filter(date <= stop_date) %>%
+  split(.$tag_serial_number) %>%
+  map(~
+  #       ggsave(
+  #   filename = here("plots",
+  #                   "depth use",
+  #                   # "abacus plots",
+  #                   # "removed-dead-det",
+  #                   Sys.Date(),
+  #                   paste0(unique(.$tag_serial_number),'.png')),
+  #   height = 7,
+  #   width = 11,
+  #   plot =
+      ggplot(data = ., aes(x = detection_timestamp_est, y = converted_sensor)) +
+      geom_point(aes(fill = station), shape = 21, size = 3, alpha = 0.5) +
+      geom_line(aes(group = 1)) + # we can remove line if it's distracting
+      scale_fill_viridis_d(begin = 0.25, end = 0.75,
+                           option = "D", name = "Receiver") +
+      scale_y_reverse() +
+      theme_bw(
+        base_size = 15
+      ) +
+      theme(panel.grid = element_blank(),
+            plot.title = element_text(hjust = 0.5)
+      ) +
+      labs(
+        title = paste("Transmitter ID:", unique(.$tag_serial_number), sep = " "),
+        x = "Date",
+        y = "Depth")
+  )
+```
+
+
+```{r, message=FALSE, results= 'hide'}
+p2 <- p %>% 
+  map( ~ ggplotly(.x)) 
+```
+
+```{r}
+htmltools::tagList(p2) 
+  
+```
+
