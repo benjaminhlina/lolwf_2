@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+Shapefiles_LO
+jack-help
+data-raw
+shapefiles
+quarto-docs
+raster-bathymetry
+.DS_Store
